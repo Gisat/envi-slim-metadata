@@ -23,13 +23,16 @@ def get_geographic_bbox(tif_path):
 def get_spatial_resolution(tif_path):
     """Return spatial resolution as a string with units (meters)."""
     with rasterio.open(tif_path) as src:
+        unit = "m"  # assuming meters for projected CRS
         res_x, res_y = src.res
         # handle sign convention and format
         res_x, res_y = abs(res_x), abs(res_y)
+        if abs(res_x) < 1e-4 and abs(res_y) < 1e-4:
+            unit = "degrees"
         if abs(res_x - res_y) < 1e-6:
-            return f"{res_x:g} m"   # e.g. "10 m"
+            return f"{res_x:g} {unit}"   # e.g. "10 m"
         else:
-            return f"{res_x:g} x {res_y:g} m"  # e.g. "10 x 20 m"
+            return f"{res_x:g} x {res_y:g} {unit}"  # e.g. "10 x 20 m"
 
 def get_coordinate_reference_system(tif_path):
     """Return CRS as EPSG code if available, otherwise WKT."""
